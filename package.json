@@ -1,0 +1,27 @@
+{
+  "name": "sst-feature-flag",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.651.1",
+    "@aws-sdk/client-rds-data": "^3.654.0",
+    "@aws-sdk/lib-dynamodb": "^3.651.1",
+    "@hono/zod-openapi": "^0.16.0",
+    "@tsconfig/node20": "^20.1.4",
+    "commander": "^12.1.0",
+    "drizzle-kit": "^0.24.2",
+    "drizzle-orm": "^0.33.0",
+    "hono": "^4.6.2",
+    "zod": "^3.23.8"
+  },
+  "scripts": {
+    "db": "sst shell drizzle-kit",
+    "db:studio": "sst shell drizzle-kit studio"
+  }
+}
