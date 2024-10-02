@@ -1,0 +1,14 @@
+{
+  "name": "@sst-feature-flag/functions",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {},
+  "devDependencies": {},
+  "dependencies": {
+    "@hono/zod-openapi": "^0.16.2",
+    "@tsconfig/node20": "^20.1.4",
+    "hono": "^4.6.3",
+    "sst": "*",
+    "zod": "^3.23.8"
+  }
+}

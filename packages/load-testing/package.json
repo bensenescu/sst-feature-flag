@@ -1,0 +1,15 @@
+{
+  "name": "@sst-feature-flag/load-testing",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@sst-feature-flag/core": "workspace:*",
+    "@types/k6": "^0.54.0",
+    "k6": "^0.0.0",
+    "sst": "*"
+  }
+}

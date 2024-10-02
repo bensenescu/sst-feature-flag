@@ -1,0 +1,15 @@
+{
+  "name": "@sst-feature-flag/interval",
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "dev": "bun --watch ./src/index.ts"
+  },
+  "dependencies": {
+    "@interval/sdk": "1.5.0",
+    "sst": "*",
+    "@sst-feature-flag/core": "workspace:*"
+  }
+}

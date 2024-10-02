@@ -1,7 +1,7 @@
-
-# sst
 .sst
-
 node_modules
 .vscode
+
+# Personal
 notes
+.env

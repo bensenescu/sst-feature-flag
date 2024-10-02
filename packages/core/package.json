@@ -1,0 +1,24 @@
+{
+  "name": "@sst-feature-flag/core",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "db": "sst shell drizzle-kit",
+    "db:studio": "sst shell drizzle-kit studio"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "^3.654.0",
+    "@openfeature/server-sdk": "^1.15.1",
+    "@tsconfig/node20": "^20.1.4",
+    "drizzle-kit": "^0.21.4",
+    "drizzle-orm": "^0.30.10",
+    "sst": "*",
+    "zod": "^3.23.8"
+  }
+}

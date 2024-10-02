@@ -1,5 +1,4 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-
 export default $config({
   app(input) {
     return {
@@ -9,32 +8,63 @@ export default $config({
     };
   },
   async run() {
-    const featureFlagMembersTable = new sst.aws.Dynamo("FeatureFlagMembers", {
-      fields: {
-        flagName: "string",
-        entityId: "string",
-        metadata: "string"
+    const intervalApiKey = new sst.Secret(
+      "IntervalApiKey",
+      "GET_API_KEY_FROM_INTERVAL_DASHBOARD",
+    );
+    const intervalServerEndpoint = new sst.Secret(
+      "IntervalServerEndpoint",
+      // This is the default endpoint for running Interval Server locally. If you're self hosting, set that as the value instead using `sst secret set`
+      "wss://interval-sandbox.com/websocket",
+    );
+
+    // TODO: Should we allow people to optionally specify a vpc?
+    const vpc = new sst.aws.Vpc("FeatureFlagVpc");
+    const db = new sst.aws.Postgres("FeatureFlagPostgres", { vpc });
+
+
+    const api = new sst.aws.Function("FeatureFlagApi", {
+      handler: "./packages/functions/src/index.handler",
+      link: [db],
+      url: true,
+      streaming: !$dev,
+    });
+    const cluster = new sst.aws.Cluster("IntervalCluster", { vpc });
+
+    // TODO: Need to figure out how to set up Interval's postgres. Maybe just manually create the db
+    // and run this command to bootstrap it: `interval-server db-init --skip-create`.
+    //   new docker.Container("IntervalPostgresLocal", {
+    //     name: "interval-postgres-local",
+    //     image: "postgres:latest",
+    //     envs: [
+    //       $interpolate`POSTGRES_USER=${db.username}`,
+    //       $interpolate`POSTGRES_PASSWORD=${db.password}`,
+    //       $interpolate`POSTGRES_DB=${db.database}`,
+    //     ],
+    //   });
+    //   intervalPostgresDBString = $resolve({
+    //     username: db.username,
+    //     password: db.password,
+    //     database: db.database
+    //   }).apply(({ username, password, database }) =>
+    //     console.log(`postgres://${username}:${password}@localhost:5432/${database}`)
+    //   );
+    // } else {
+    //   intervalPostgresDBString = "production";
+    // }
+
+    cluster.addService("IntervalApp", {
+      link: [db, intervalApiKey, intervalServerEndpoint],
+      image: {
+        dockerfile: "packages/interval/Dockerfile",
       },
-      // Query: is the entity assigned to the flag?
-      primaryIndex: { hashKey: "entityId", rangeKey: "flagName" },
-      globalIndexes: {
-        // TODO: Should i event stuff the metadata in here? I don't remember how to model data in dynamodb.
-        byEntity: { hashKey: "entityId", rangeKey: "metadata" },
+      dev: {
+        command: "bun dev",
       },
     });
 
-    // TODO: In dev, lets just spin up postgres locally so we don't need to setup a vpc.
-    const vpc = new sst.aws.Vpc("FeatureFlagVpc");
-    const rds = new sst.aws.Postgres("FeatureFlagPostgres", { vpc });
-
-    // const hono = new sst.aws.Function("Api", {
-    //   url: true,
-    //   handler: "src/functions/index.handler",
-    //   link: [featureFlagsTable, featureFlagMembersTable],
-    // });
-
-    // return {
-    //   api: hono.url,
-    // };
+    return {
+      Api: api.url,
+    };
   },
 });
