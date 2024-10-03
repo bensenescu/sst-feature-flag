@@ -48,7 +48,7 @@ export module FeatureFlagEvaluation {
     defaultValue: T,
     context: EvaluationContext,
   ) => {
-    const [flag] = await db
+    const [res] = await db
       .select()
       .from(featureFlagTable)
       .where(
@@ -56,7 +56,14 @@ export module FeatureFlagEvaluation {
           eq(featureFlagTable.flagKey, flagKey),
           eq(featureFlagTable.archived, false),
         ),
+      )
+      .leftJoin(
+        featureFlagMemberTable,
+        eq(featureFlagTable.id, featureFlagMemberTable.flagId),
       );
+
+    const flag = res?.feature_flag
+
     if (!flag) {
       return {
         value: defaultValue,
@@ -118,16 +125,23 @@ export module FeatureFlagEvaluation {
 
     const { entityType, entityId } = parseTargetingSchemaResult.data;
 
-    const [flagMember] = await db
+    const [flagMemberRes] = await db
       .select()
       .from(featureFlagMemberTable)
+      .leftJoin(
+        featureFlagMemberTable,
+        eq(featureFlagTable.id, featureFlagMemberTable.flagId),
+      )
       .where(
         and(
-          eq(featureFlagMemberTable.flagKey, flagKey),
+          eq(featureFlagTable.flagKey, flagKey),
           eq(featureFlagMemberTable.entityType, entityType),
           eq(featureFlagMemberTable.entityId, entityId),
         ),
       );
+
+    const flagMember = flagMemberRes?.feature_flag_member;
+
     // Return default if there is no entry for the given target. This means that the entity hasn't
     // been explicitly targeted or excluded so we should opt to return the default value.
     if (!flagMember) {

@@ -169,6 +169,7 @@ Here are the instructions for self hosting interval: https://github.com/interval
 
 ### Todos
 
+- [ ] Add API key auth to the API
 - [ ] Create a provider for openfeature.dev
 - [ ] Add percentage rollout flags
   - This would allow you to specify that you want 20% of entities to have access to a flag.

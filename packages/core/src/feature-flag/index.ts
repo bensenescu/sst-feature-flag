@@ -211,7 +211,8 @@ export module FeatureFlag {
   export const archive = async (flagKey: string) => {
     return db
       .update(featureFlagTable)
-      .set({ archived: true })
+      // Append "_archived" so that the flag key is free to be reused since they are unique
+      .set({ archived: true, flagKey: `${flagKey}_archived` })
       .where(eq(featureFlagTable.flagKey, flagKey));
   };
 
@@ -233,9 +234,18 @@ export module FeatureFlag {
       structuredValue?: string;
     },
   ) => {
+
+    const flagRes = await db.select().from(featureFlagTable).where(eq(featureFlagTable.flagKey, flagKey))
+
+
+    const flag = flagRes?.[0]
+    if (!flag) {
+      throw new Error(`Flag ${flagKey} not found`);
+    }
+
     // TODO: Make this a transaction
     const membersToAdd = entityIds.map((entityId) => ({
-      flagKey,
+      flagId: flag.id,
       entityId,
       entityType,
       booleanValue: valueMap.booleanValue,
@@ -245,7 +255,7 @@ export module FeatureFlag {
     }));
 
     // This onConflictDoNothing could be dangerous if featureFlagMember involves more data in the future.
-    // Then, other updates outside of flagKey, entityId, and entityType may not get updated when
+    //   Then, other updates outside of flagKey, entityId, and entityType may not get updated when
     // the unique constraint is violated.
     await db
       .insert(featureFlagMemberTable)
@@ -254,6 +264,7 @@ export module FeatureFlag {
 
     const logEntries = membersToAdd.map((entry) => ({
       ...entry,
+      flagId: flag.id,
       event: "ADDED" as const,
     }));
     await db.insert(featureFlagMemberLogTable).values(logEntries);
@@ -262,6 +273,16 @@ export module FeatureFlag {
   export const removeMembers = async (
     input: Pick<FeatureFlagMember, "flagKey" | "entityId">[],
   ) => {
+    const flagKey = input[0]?.flagKey
+    if (!flagKey) {
+      throw new Error('No flag key provided');
+    }
+    const flagRes = await db.select().from(featureFlagTable).where(eq(featureFlagTable.flagKey, flagKey))
+
+    const flag = flagRes[0]
+    if (!flag) {
+      throw new Error(`Flag ${flagKey} not found`);
+    }
     // TODO: Make this a transaction
     const deletedMembers = await db
       .delete(featureFlagMemberTable)
@@ -269,7 +290,7 @@ export module FeatureFlag {
         or(
           ...input.map((entry) =>
             and(
-              eq(featureFlagMemberTable.flagKey, entry.flagKey),
+              eq(featureFlagMemberTable.flagId, flag.id),
               eq(featureFlagMemberTable.entityId, entry.entityId),
             ),
           ),
@@ -279,7 +300,7 @@ export module FeatureFlag {
 
     // TODO: If this fails, we should add it to a queue to be retried.
     const logEntries = deletedMembers.map((entry) => ({
-      flagKey: entry.flagKey,
+      flagId: flag.id,
       entityId: entry.entityId,
       entityType: entry.entityType,
       event: "REMOVED" as const,
@@ -289,10 +310,16 @@ export module FeatureFlag {
 
   // TODO: Add pagination, sorting, etc. This should probably return a count as well.
   export const getMembers = async (flagKey: string) => {
+    const flagRes = await db.select().from(featureFlagTable).where(eq(featureFlagTable.flagKey, flagKey))
+
+    const flag = flagRes?.[0]
+    if (!flag) {
+      throw new Error(`Flag ${flagKey} not found`);
+    }
     return db
       .select()
       .from(featureFlagMemberTable)
-      .where(eq(featureFlagMemberTable.flagKey, flagKey))
+      .where(eq(featureFlagMemberTable.flagId, flag.id))
       .orderBy(desc(featureFlagMemberTable.createdAt));
   };
 

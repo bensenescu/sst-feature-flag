@@ -31,28 +31,6 @@ export default $config({
     });
     const cluster = new sst.aws.Cluster("IntervalCluster", { vpc });
 
-    // TODO: Need to figure out how to set up Interval's postgres. Maybe just manually create the db
-    // and run this command to bootstrap it: `interval-server db-init --skip-create`.
-    //   new docker.Container("IntervalPostgresLocal", {
-    //     name: "interval-postgres-local",
-    //     image: "postgres:latest",
-    //     envs: [
-    //       $interpolate`POSTGRES_USER=${db.username}`,
-    //       $interpolate`POSTGRES_PASSWORD=${db.password}`,
-    //       $interpolate`POSTGRES_DB=${db.database}`,
-    //     ],
-    //   });
-    //   intervalPostgresDBString = $resolve({
-    //     username: db.username,
-    //     password: db.password,
-    //     database: db.database
-    //   }).apply(({ username, password, database }) =>
-    //     console.log(`postgres://${username}:${password}@localhost:5432/${database}`)
-    //   );
-    // } else {
-    //   intervalPostgresDBString = "production";
-    // }
-
     cluster.addService("IntervalApp", {
       link: [db, intervalApiKey, intervalServerEndpoint],
       image: {

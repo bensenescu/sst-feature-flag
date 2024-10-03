@@ -44,9 +44,9 @@ export const featureFlagMemberTable = pgTable(
   "feature_flag_member",
   {
     id: serial("id").primaryKey(),
-    flagKey: text("flag_key")
+    flagId: integer("flag_id")
       .notNull()
-      .references(() => featureFlagTable.flagKey),
+      .references(() => featureFlagTable.id),
     entityId: text("entity_id").notNull(),
     entityType: text("entity_type").notNull(),
     booleanValue: boolean("boolean_value"),
@@ -59,7 +59,7 @@ export const featureFlagMemberTable = pgTable(
   (table) => {
     return {
       entityIdIndex: index("flag_member_entity_id_idx").on(table.entityId),
-      unq: unique().on(table.flagKey, table.entityId, table.entityType),
+      unq: unique().on(table.flagId, table.entityId, table.entityType),
     };
   },
 );
@@ -72,9 +72,9 @@ export const featureFlagMemberLogTable = pgTable(
   "feature_flag_member_log",
   {
     id: serial("id").primaryKey(),
-    flagKey: text("flag_id")
+    flagId: integer("flag_id") // Change here
       .notNull()
-      .references(() => featureFlagTable.flagKey),
+      .references(() => featureFlagTable.id), // Change here
     entityId: text("entity_id").notNull(),
     entityType: text("entity_type").notNull(),
     booleanValue: boolean("boolean_value"),
