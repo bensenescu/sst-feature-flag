@@ -3,7 +3,7 @@
 SST Feature Flag is a feature flagging service that you can deploy into your AWS account
 with only a few simple commands.
 
-<img width="1322" alt="Screenshot 2024-10-02 at 10 33 12 PM" src="https://github.com/user-attachments/assets/5850299a-2c62-4046-a2be-24f053c3f61b">
+<img width="1329" alt="Screenshot 2024-10-03 at 2 19 40 PM" src="https://github.com/user-attachments/assets/502171de-a5de-40de-8d67-6158386e8cdf">
 
 ## Table of Contents
 
