@@ -38,7 +38,7 @@ Some examples:
 
 ## OpenFeature
 
-The API for evaluating flags is designed based on the [openfeature.dev](https://openfeature.dev) spec. This is a project that
+The API for evaluating flags follows the [openfeature.dev](https://openfeature.dev) spec. This is a project that
 defines a standard and sdk for flags so that people aren't tied to a specific sass vendor, oss project,
 or handrolled solution.
 
