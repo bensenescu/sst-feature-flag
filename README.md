@@ -74,8 +74,9 @@ Here are the steps to start the local development environment (if you're self ho
 1. Get you Personal Development Key and copy it to your clipboard
    - https://interval-sandbox.com/dashboard/develop/keys
 1. `npx sst secret set IntervalApiKey YOUR_API_KEY_HERE`
-1. `sst dev`
+1. `npx sst dev`
    - Note the Api Url in the output. This will be used to call the evaluation API.
+1. `nox sst shell -- drizzle-studio push` - This initializes the db.
 
 ## Example Walkthroughs
 
@@ -94,6 +95,7 @@ curl [api_url_output_from_sst_dev]/feature-flag/evaluate \
         "context": {}
 }'
 ```
+
 ### Create a dynamic feature flag and use Evaluation API
 
 1. Create another boolean feature flag called `test-bool-flag-dynamic`, but this time make it dynamic
@@ -117,23 +119,28 @@ curl [api_url_output_from_sst_dev]/feature-flag/evaluate \
 Note: this will take a few minutes the first time you do it to spin up the vpc and database
 
 ## Deployment
+
 ### General Steps:
-1. `npx sst secret set IntervalApiKey [live_key_value] --stage prod` 
-2. `npx sst secret set IntervalServerEndpoint [self_hosted_interval_endpoint] --stage prod`
-3. `npx sst deploy --stage prod`
+
+1. `npx sst secret set IntervalApiKey [live_key_value] --stage prod`
+1. `npx sst secret set IntervalServerEndpoint [self_hosted_interval_endpoint] --stage prod`
+1. `npx sst deploy --stage prod`
+1. `nox sst shell --stage prod -- drizzle-studio push` - This initializes the db.
 
 ### Actual Steps
+
 1. Self host interval as described in [#more-on-interval](#more-on-interval)
 2. Get a "live key" for your production deploy
-   
-If you don't need multiple team members to be able to easily manage flags, you can use your Personal Access Token in `prod` sst stage and `development` ui for managing flags. 
+
+If you don't need multiple team members to be able to easily manage flags, you can use your Personal Access Token in `prod` sst stage and `development` ui for managing flags.
 
 If you need multiple team members to manage flags, its a bit trickier. Basically, Interval recently shut down their cloud offering and the self hosting is still rough around the edges. You need to "confirm your email" to create a live key. Here are some options:
+
 1. Set up PostMark as described in their docs. Postmark was not simple to set up so I didn't do it in the sandbox.
 2. Share a user login in a password manager so that your team can all log in as that user to manage flags in "development" mode.
 3. Manually enter an into the `email` field in the `UserEmailConfirmationToken` table. This is effectively the same as the email being confirmed.
 
-Once the TUI is built, this should all be easier so that you can just manage your flags with `sst shell -- sst-ff-tui`. Also, hopefully email sending becomes provider agnostic so that we can use SES instead of Postmark. 
+Once the TUI is built, this should all be easier so that you can just manage your flags with `sst shell -- sst-ff-tui`. Also, hopefully email sending becomes provider agnostic so that we can use SES instead of Postmark.
 
 ## Extra Resources
 
